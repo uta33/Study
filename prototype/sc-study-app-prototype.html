@@ -1,0 +1,627 @@
+<title>支援士 学習ノート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: 上部に試験までの残り日数、下に「管理」「学習」の2タブ。管理は記録と進捗、学習は一問一答 */
+:root{
+  --bg:#f5f7f6;--surface:#ffffff;--sunk:#eef2f0;--fg:#15211e;--muted:#5b6b66;--line:#d9e1de;
+  --accent:#0f6b5c;--accent-soft:#e1efeb;--warn:#b5561b;--warn-soft:#f8e9df;--ok:#1f7a3a;--ok-soft:#e2f2e6;--bad:#b3261e;--bad-soft:#f9e3e1;
+  --f-display:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1715;--surface:#162320;--sunk:#12201c;--fg:#e4ece9;--muted:#98aaa4;--line:#2a3a36;
+  --accent:#5cc4ae;--accent-soft:#1c3530;--warn:#f0a472;--warn-soft:#3a2a1f;--ok:#7fd494;--ok-soft:#1b3322;--bad:#f28b82;--bad-soft:#3a2120;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1715;--surface:#162320;--sunk:#12201c;--fg:#e4ece9;--muted:#98aaa4;--line:#2a3a36;
+  --accent:#5cc4ae;--accent-soft:#1c3530;--warn:#f0a472;--warn-soft:#3a2a1f;--ok:#7fd494;--ok-soft:#1b3322;--bad:#f28b82;--bad-soft:#3a2120;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:20px 56px}
+.wrap{max-width:880px;margin:0 auto;display:grid;gap:20px}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.35;text-wrap:balance}
+h1{font-size:24px;font-weight:900}
+h2{font-size:17px;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:grid;gap:12px}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.status{font-size:12px;color:var(--muted)}
+.count{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.count{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cd{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:0}
+.cd .n{font-family:var(--f-mono);font-weight:700;font-size:24px;line-height:1.2}
+.cd .n small{font-size:12px;font-weight:500;color:var(--muted);margin-left:2px}
+.cd .l{font-size:12px;color:var(--muted);line-height:1.4}
+.cd.next{border-color:var(--accent);background:var(--accent-soft)}
+.cd.next .n{color:var(--accent)}
+.cd.done{opacity:.55}
+
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;border:1px solid var(--line)}
+.tabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:7px;font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+.panel{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:7px;font-size:14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.btn.warn{background:var(--warn);border-color:var(--warn);color:var(--bg);font-weight:700}
+.btn:disabled{opacity:.5;cursor:default}
+select,input[type=number],input[type=date],input[type=text]{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:6px 8px;min-width:0}
+input[type=number]{width:80px}
+label.f{display:grid;gap:2px;font-size:12px;color:var(--muted)}
+
+/* 今週 */
+.weekhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.big{font-family:var(--f-mono);font-weight:700;font-size:28px}
+.meter{height:10px;background:var(--sunk);border-radius:5px;overflow:hidden;display:flex}
+.meter i{display:block;height:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+
+.timer{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.timer .clock{font-family:var(--f-mono);font-size:22px;font-weight:700;min-width:5.5ch}
+.chart{overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto;min-width:420px}
+
+.logs{list-style:none;margin:0;padding:0;display:grid}
+.logs li{display:grid;grid-template-columns:78px 64px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.logs li:last-child{border-bottom:0}
+.chip{font-family:var(--f-mono);font-size:11px;padding:1px 6px;border-radius:4px;background:var(--sunk);justify-self:start;border-left:3px solid var(--c)}
+.x{border:0;background:transparent;color:var(--muted);font-size:13px;padding:2px 6px}
+.memo{min-width:0;overflow-wrap:anywhere}
+
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.tasks li{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start}
+.tasks input{margin:5px 0 0;width:16px;height:16px;accent-color:var(--accent)}
+.tasks input:checked + label{color:var(--muted);text-decoration:line-through}
+details.wk{border-top:1px solid var(--line);padding-top:8px}
+details.wk summary{cursor:pointer;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+details.wk summary .mono{color:var(--muted);font-size:12px}
+details.wk[open] summary{margin-bottom:8px}
+.cur{font-size:11px;background:var(--accent);color:var(--bg);border-radius:4px;padding:0 6px;margin-left:6px;font-family:var(--f-mono)}
+
+.acc{display:grid;gap:6px}
+.acc .r{display:grid;grid-template-columns:8.5em 1fr 4.2em;gap:8px;align-items:center;font-size:13px}
+.acc .bar{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.acc .bar i{display:block;height:100%;background:var(--accent)}
+.acc .r.low .bar i{background:var(--warn)}
+
+/* 学習 */
+.qhead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.theme{font-size:12px;font-family:var(--f-mono);color:var(--accent);background:var(--accent-soft);padding:1px 8px;border-radius:4px}
+.q{font-size:17px;line-height:1.75;font-weight:700}
+.choices{display:grid;gap:8px}
+.choice{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1.6em 1fr;gap:6px;font-size:15px;line-height:1.6}
+.choice .k{font-family:var(--f-mono);color:var(--muted)}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice.right{background:var(--ok-soft);border-color:var(--ok)}
+.choice.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.choice:disabled{cursor:default}
+.exp{background:var(--sunk);border-radius:8px;padding:12px;font-size:14px;display:grid;gap:4px}
+.exp b.ok{color:var(--ok)} .exp b.ng{color:var(--bad)}
+.prog{height:4px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.result{text-align:center;display:grid;gap:8px;justify-items:center;padding-block:12px}
+.result .big{font-size:40px}
+.misslist{list-style:none;padding:0;margin:0;display:grid;gap:6px;text-align:left;width:100%;font-size:14px}
+.misslist li{padding:8px 10px;background:var(--sunk);border-radius:6px}
+.note{font-size:12px;color:var(--muted)}
+.banner{font-size:13px;background:var(--warn-soft);color:var(--warn);padding:8px 12px;border-radius:8px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>支援士 学習ノート</h1>
+      <span class="status" id="syncStatus">読み込み中…</span>
+    </div>
+    <div class="count" id="countdown"></div>
+    <div class="banner" id="localBanner" hidden>この画面では記録を共有保存できないため、このブラウザ内にだけ保存しています。</div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-manage" aria-selected="true" aria-controls="p-manage">管理</button>
+      <button role="tab" id="tab-study" aria-selected="false" aria-controls="p-study">学習</button>
+    </div>
+  </header>
+
+  <!-- 管理 -->
+  <main class="panel" id="p-manage" role="tabpanel" aria-labelledby="tab-manage">
+    <section class="card" aria-labelledby="wk-h">
+      <div class="weekhead">
+        <h2 id="wk-h">今週の学習時間</h2>
+        <span class="small muted">目標 <input type="number" id="goal" min="60" step="30" aria-label="週の目標（分）"> 分</span>
+      </div>
+      <div class="row" style="align-items:baseline;gap:6px"><span class="big" id="wkTotal">0:00</span><span class="muted small" id="wkPct"></span></div>
+      <div class="meter" id="wkMeter"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card" aria-labelledby="rec-h">
+      <h2 id="rec-h">記録する</h2>
+      <div class="timer">
+        <select id="tSubject" aria-label="タイマーの科目"></select>
+        <span class="clock" id="tClock">0:00</span>
+        <button class="btn primary" id="tBtn">タイマー開始</button>
+      </div>
+      <div class="row" style="align-items:end">
+        <label class="f">日付<input type="date" id="fDate"></label>
+        <label class="f">科目<select id="fSubject"></select></label>
+        <label class="f">分<input type="number" id="fMin" min="1" max="600" value="60"></label>
+        <label class="f" style="flex:1;min-width:160px">メモ<input type="text" id="fMemo" maxlength="120" placeholder="例：午前Ⅱ R6 20問 16/20"></label>
+        <button class="btn primary" id="fAdd">追加</button>
+      </div>
+      <p class="note" id="fMsg"></p>
+    </section>
+
+    <section class="card" aria-labelledby="ch-h">
+      <h2 id="ch-h">直近14日</h2>
+      <div class="chart" id="chart"></div>
+    </section>
+
+    <div class="grid2">
+      <section class="card" aria-labelledby="tk-h">
+        <h2 id="tk-h">計画のタスク</h2>
+        <div id="tasks"></div>
+      </section>
+      <section class="card" aria-labelledby="ac-h">
+        <h2 id="ac-h">テーマ別の正答率</h2>
+        <div class="acc" id="acc"></div>
+        <p class="note">学習タブの一問一答の結果から集計しています。60%未満はオレンジで表示します。</p>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="lg-h">
+      <h2 id="lg-h">学習ログ</h2>
+      <ul class="logs" id="logs"></ul>
+    </section>
+  </main>
+
+  <!-- 学習 -->
+  <main class="panel" id="p-study" role="tabpanel" aria-labelledby="tab-study" hidden>
+    <section class="card" id="qSetup">
+      <h2>一問一答</h2>
+      <p class="small muted">重点テーマと科目A-1の頻出分野から作ったオリジナル問題です。結果は自動で記録され、管理タブの正答率に反映されます。</p>
+      <div class="row" style="align-items:end">
+        <label class="f">出題順<select id="qMode">
+          <option value="weak">苦手・未回答を優先</option>
+          <option value="random">ランダム</option>
+        </select></label>
+        <label class="f">テーマ<select id="qTheme"><option value="all">すべて</option></select></label>
+        <label class="f">問題数<select id="qCount"><option>5</option><option selected>10</option><option>20</option></select></label>
+        <button class="btn primary" id="qStart">始める</button>
+      </div>
+      <p class="note" id="qInfo"></p>
+    </section>
+    <section class="card" id="qCard" hidden></section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- 定数 ---------- */
+var SUBJECTS=[
+  {k:"A1",n:"科目A-1",c:"#6a8caf"},
+  {k:"A2",n:"科目A-2",c:"#0f6b5c"},
+  {k:"B",n:"科目B",c:"#b5561b"},
+  {k:"IN",n:"インプット",c:"#8a7a3a"},
+  {k:"QZ",n:"一問一答",c:"#7a5c9a"}
+];
+function subj(k){for(var i=0;i<SUBJECTS.length;i++)if(SUBJECTS[i].k===k)return SUBJECTS[i];return SUBJECTS[3];}
+
+var EXAMS=[
+  {k:"examA",l:"前期 科目A",d:"2026-10-26",edit:true},
+  {k:"examB",l:"前期 科目B",d:"2026-11-21",edit:true},
+  {k:"k2A",l:"後期 科目A-2",d:"2027-02-20",edit:false},
+  {k:"k2B",l:"後期 科目B",d:"2027-03-16",edit:false}
+];
+
+var TASKS=[
+ {w:"第1週",f:"2026-09-29",t:"2026-10-05",items:[["t01","A-1の過去問を1日30問。分野ごとの正答率を記録"],["t02","A-2の過去問を1日20問"],["t03","週末に弱点分野を3つに絞る"]]},
+ {w:"第2週",f:"2026-10-06",t:"2026-10-12",items:[["t04","10/6 10時に前期を申込み、会場を予約"],["t05","A-1の弱点3分野を読み直して集中演習"],["t06","A-2を1日20問。間違いは用語カード化"]]},
+ {w:"第3週",f:"2026-10-13",t:"2026-10-19",items:[["t07","A-1を50分通しで3回分"],["t08","A-2を40分通しで3回分"],["t09","CBTの試験画面の操作説明を触る"]]},
+ {w:"第4週",f:"2026-10-20",t:"2026-10-26",items:[["t10","間違いノートと用語カードを総復習"],["t11","本人確認書類と会場ルートを確認"],["t12","科目A-1・A-2を受験"]]},
+ {w:"第5週",f:"2026-10-27",t:"2026-11-02",items:[["t13","科目B：令和7年度を1問ずつ時間無制限で"],["t14","解答例と採点講評で答え方を確認"]]},
+ {w:"第6週",f:"2026-11-03",t:"2026-11-09",items:[["t15","科目B：令和6年度を1問40〜45分で"],["t16","問題文はPC画面のPDFで読む"]]},
+ {w:"第7週",f:"2026-11-10",t:"2026-11-16",items:[["t17","科目B：令和5年度を150分通し"],["t18","問題選択の方針を決める"]]},
+ {w:"第8週",f:"2026-11-17",t:"2026-11-23",items:[["t19","解答例の読み直しにとどめる"],["t20","科目Bを受験し、迷った論点をメモ"]]},
+ {w:"11月下旬",f:"2026-11-24",t:"2026-11-30",items:[["t21","弱点テーマの順番を決める"]]},
+ {w:"12月〜1月",f:"2026-12-01",t:"2027-01-26",items:[["t22","平日：重点テーマを1つ読み、科目Bを1問"],["t23","休日：科目Bを2問、時間制限つき"],["t24","A-2を週50問ペースで維持"],["t25","前期の科目B得点をマイページで確認"]]},
+ {w:"後期準備",f:"2027-01-27",t:"2027-02-19",items:[["t26","後期に申込み、A-1免除を申請"],["t27","A-2を年度別に40分通し"],["t28","休日に科目B 150分通しを毎週"]]},
+ {w:"後期A-2",f:"2027-02-20",t:"2027-03-02",items:[["t29","科目A-2を受験"]]},
+ {w:"後期B",f:"2027-03-03",t:"2027-03-28",items:[["t30","未着手の年度を解き切り、苦手を2周目"],["t31","科目Bを受験"]]}
+];
+
+var THEMES={auth:"認証・認可",crypto:"暗号・PKI",mail:"メール・DNS",web:"Webアプリ",net:"ネットワーク",cloud:"クラウド・監視",ir:"インシデント対応",supply:"サプライチェーン",law:"マネジメント・法令",a1:"A-1共通知識"};
+
+var Q=[
+{id:"au1",t:"auth",q:"OAuth 2.0の認可コードフローでPKCEを使う主な目的はどれか。",c:["認可コードを横取りした第三者によるアクセストークン取得を防ぐ","認可要求と応答を紐付けてCSRFを防ぐ","アクセストークンの有効期限を短くする","リソースサーバでのトークン検証を不要にする"],a:0,e:"PKCEはcode_verifierのハッシュ（code_challenge）を認可要求に含め、トークン要求時に元の値を示させる仕組み。認可コードだけを盗んでもトークンを取れない。CSRF対策はstateパラメータの役割。"},
+{id:"au2",t:"auth",q:"OpenID ConnectがOAuth 2.0に追加した、利用者の認証結果を表すJWTはどれか。",c:["IDトークン","アクセストークン","リフレッシュトークン","認可コード"],a:0,e:"IDトークンには発行者（iss）、対象（aud）、利用者識別子（sub）、有効期限などが入り、署名で改ざんを検知できる。アクセストークンはAPI呼出しの認可に使うもの。"},
+{id:"au3",t:"auth",q:"OAuth 2.0の認可要求に含めるstateパラメータの主な役割はどれか。",c:["認可応答が自分の送った要求に対するものか確認し、CSRFを防ぐ","アクセストークンを暗号化する","スコープの範囲を指定する","クライアントシークレットを保護する"],a:0,e:"クライアントは推測困難なstateを生成してセッションに保存し、戻ってきた値と照合する。攻撃者の認可コードを被害者のセッションに紐付けられる攻撃を防ぐ。"},
+{id:"au4",t:"auth",q:"SAMLによるシングルサインオンで、IdPがSPに渡す認証結果の情報を何と呼ぶか。",c:["アサーション","チケット","クッキー","ダイジェスト"],a:0,e:"SAMLアサーションはXML形式で、IdPの署名が付く。SPは署名とAudience、有効期限を検証して利用者を受け入れる。チケットはKerberosの用語。"},
+{id:"au5",t:"auth",q:"FIDO2（WebAuthn）の認証がフィッシングに強い理由として適切なものはどれか。",c:["認証器の鍵がサイトのオリジンに紐付いており、偽サイトでは署名が使えない","パスワードを暗号化して送信する","ワンタイムパスワードが短時間で失効する","生体情報をサーバ側で照合する"],a:0,e:"鍵ペアはRP ID（ドメイン）ごとに作られ、ブラウザが実際の接続先のオリジンを渡す。偽ドメインではその鍵が使われないため、中継型のフィッシングも成立しにくい。生体情報は端末内で使われ、サーバには送られない。"},
+{id:"au6",t:"auth",q:"パスワードリスト攻撃の説明として適切なものはどれか。",c:["他サービスから漏えいしたIDとパスワードの組を別のサービスで試す","よく使われるパスワード1つを多数のIDに試す","1つのIDに対してパスワードを総当たりで試す","ハッシュ値から事前計算表で元のパスワードを求める"],a:0,e:"使い回しを突く攻撃。2は逆総当たり（パスワードスプレー）、3はブルートフォース、4はレインボーテーブル攻撃。対策は多要素認証、漏えいパスワードの利用禁止、ログイン試行の監視。"},
+{id:"cr1",t:"crypto",q:"TLS 1.3で前方秘匿性（PFS）を実現している鍵交換方式はどれか。",c:["ECDHEなどのエフェメラルなDiffie-Hellman","サーバ証明書の公開鍵によるRSA鍵交換","固定のDiffie-Hellmanパラメータ","事前共有鍵のみ"],a:0,e:"通信ごとに使い捨ての鍵ペアを作るため、後でサーバの秘密鍵が漏えいしても過去の通信は復号できない。RSA鍵交換はTLS 1.3で廃止された。"},
+{id:"cr2",t:"crypto",q:"OCSPステープリングの説明として適切なものはどれか。",c:["サーバが取得したOCSP応答をハンドシェイク時に提示し、クライアントの問合せを不要にする","CAが失効した証明書の一覧を定期的に配布する","ブラウザにHTTPSでの接続を強制する","証明書の発行を公開ログに記録する"],a:0,e:"クライアントがOCSPレスポンダへ個別に問い合わせる負荷や、閲覧先がCAに知られるプライバシー上の問題を減らせる。2はCRL、3はHSTS、4はCertificate Transparency。"},
+{id:"cr3",t:"crypto",q:"HSTSを設定することで防ぎやすくなる攻撃はどれか。",c:["HTTPからHTTPSへのリダイレクトを悪用するSSLストリッピング","SQLインジェクション","DNSリフレクション攻撃","クロスサイトスクリプティング"],a:0,e:"Strict-Transport-Securityヘッダを受け取ったブラウザは、有効期間中はそのドメインにHTTPSでしか接続しない。初回アクセスの隙はプリロードリストで補う。"},
+{id:"cr4",t:"crypto",q:"ハッシュ関数の「第二原像計算困難性」の説明はどれか。",c:["与えられたメッセージと同じハッシュ値になる別のメッセージを見つけるのが困難","ハッシュ値から元のメッセージを求めるのが困難","同じハッシュ値になる任意の2つのメッセージを見つけるのが困難","ハッシュ値の長さが入力によらず一定"],a:0,e:"2は原像計算困難性（一方向性）、3は衝突発見困難性。第二原像は「特定のメッセージを固定したうえで」同じ値を探す点が衝突発見困難性との違い。"},
+{id:"cr5",t:"crypto",q:"AES-GCMの特徴として適切なものはどれか。",c:["暗号化と同時に改ざん検知用のタグを生成する認証付き暗号である","公開鍵暗号方式である","同じナンスを繰り返し使っても安全である","ブロック暗号をCBCモードで使う方式である"],a:0,e:"GCMはカウンタモードの暗号化にGHASHによる認証を組み合わせたAEAD。ナンスの再利用は機密性と認証の両方を壊すため厳禁。"},
+{id:"cr6",t:"crypto",q:"デジタル署名の生成と検証に使う鍵の組合せとして正しいものはどれか。",c:["生成は送信者の秘密鍵、検証は送信者の公開鍵","生成は受信者の公開鍵、検証は受信者の秘密鍵","生成は送信者の公開鍵、検証は送信者の秘密鍵","生成も検証も共通鍵"],a:0,e:"秘密鍵を持つ本人しか署名を作れないことで、真正性と否認防止を実現する。2は暗号化（機密性）の組合せ。"},
+{id:"ml1",t:"mail",q:"SPFが検証する内容として適切なものはどれか。",c:["エンベロープFrom（MAIL FROM）のドメインに対し、送信元IPアドレスが許可されているか","メール本文とヘッダが改ざんされていないか","ヘッダFromのドメインと認証ドメインが一致しているか","受信者のメールアドレスが存在するか"],a:0,e:"SPFはドメインのDNS TXTレコードに送信を許可するIPを記述し、受信側が接続元IPと照合する。改ざん検知はDKIM、ドメインの一致（アライメント）確認はDMARC。"},
+{id:"ml2",t:"mail",q:"DMARCで行う「アライメント」の確認とはどれか。",c:["ヘッダFromのドメインが、SPFまたはDKIMで認証されたドメインと一致するか","DKIM署名の公開鍵がDNSに登録されているか","送信元IPが逆引きできるか","メールがTLSで送られたか"],a:0,e:"SPFとDKIMだけでは、利用者に見えるヘッダFromの詐称を防げない。DMARCはその一致を求め、失敗時の扱い（none、quarantine、reject）とレポート送付先をポリシーとして宣言する。"},
+{id:"ml3",t:"mail",q:"DKIMの署名を検証するための公開鍵は、どこに公開されるか。",c:["送信ドメインのDNS TXTレコード（セレクタ._domainkey）","メールヘッダ内のReceivedフィールド","受信側メールサーバの設定ファイル","認証局の証明書リポジトリ"],a:0,e:"DKIM-SignatureヘッダのsタグとdタグからDNS名を組み立てて公開鍵を取得する。M365ではセレクタ1と2のCNAMEを登録して有効化する。"},
+{id:"ml4",t:"mail",q:"DNSキャッシュポイズニング（カミンスキー攻撃）の対策として有効なものはどれか。",c:["問合せの送信元ポート番号をランダム化する","ゾーン転送を許可する","TTLを長くする","再帰問合せを誰からでも受け付ける"],a:0,e:"偽応答を当てるにはトランザクションIDとポート番号の両方を当てる必要があり、推測が難しくなる。根本対策はDNSSECによる応答の署名検証。"},
+{id:"ml5",t:"mail",q:"DNSSECが提供するものとして適切なものはどれか。",c:["DNS応答の出自の認証と完全性","DNS問合せ内容の暗号化","DDoS攻撃の遮断","ゾーン転送の高速化"],a:0,e:"DNSSECは署名で応答が正規の権威サーバのものか、改ざんされていないかを確かめる。機密性は提供しないため、問合せの暗号化はDoTやDoHの役割。"},
+{id:"ml6",t:"mail",q:"オープンリゾルバを放置すると悪用されやすい攻撃はどれか。",c:["DNSリフレクション（アンプ）攻撃の踏み台","SQLインジェクション","セッションハイジャック","ARPスプーフィング"],a:0,e:"送信元IPを被害者に詐称した小さな問合せで、大きな応答を被害者に送りつけられる。キャッシュDNSサーバは内部からの問合せだけに応答するよう制限する。"},
+{id:"wb1",t:"web",q:"SQLインジェクションの根本的な対策として最も適切なものはどれか。",c:["プレースホルダ（バインド機構）でSQL文を組み立てる","入力値の長さを制限する","WAFを導入する","エラーメッセージを表示しない"],a:0,e:"値をSQLの構文と分離して渡すため、入力に記号が含まれても命令として解釈されない。WAFやエラー非表示は被害を減らす補助策。"},
+{id:"wb2",t:"web",q:"クロスサイトスクリプティングの根本的な対策として適切なものはどれか。",c:["出力する文脈に合わせてエスケープ処理を行う","入力値をすべて大文字に変換する","CookieにSecure属性を付ける","HTTPSで通信する"],a:0,e:"HTML本文、属性値、JavaScript内など出力先の文脈ごとに適切なエスケープを行う。CSPやHttpOnly属性は被害を緩和する多層防御。"},
+{id:"wb3",t:"web",q:"CookieにHttpOnly属性を付けたときの効果はどれか。",c:["JavaScriptからCookieを読み取れなくなる","HTTPS通信のときだけCookieを送る","他サイトからのリクエストでCookieを送らない","Cookieの有効期限がブラウザ終了までになる"],a:0,e:"XSSが起きてもdocument.cookieでセッションIDを盗まれにくくなる。2はSecure属性、3はSameSite属性の効果。"},
+{id:"wb4",t:"web",q:"CookieのSameSite属性をLaxにしたとき、主に緩和される攻撃はどれか。",c:["クロスサイトリクエストフォージェリ（CSRF）","SQLインジェクション","ディレクトリトラバーサル","OSコマンドインジェクション"],a:0,e:"Laxでは他サイト起点のPOSTなどでCookieが送られないため、ログイン状態を悪用した意図しない操作を防ぎやすい。トップレベルのGET遷移では送られる点に注意。"},
+{id:"wb5",t:"web",q:"SSRF（サーバサイドリクエストフォージェリ）の説明として適切なものはどれか。",c:["サーバに細工したURLを処理させ、内部ネットワークなど本来届かない宛先へリクエストを送らせる","利用者のブラウザに意図しないリクエストを送らせる","サーバのファイルを相対パスで読み出す","DNSの応答を偽造する"],a:0,e:"クラウドではインスタンスのメタデータサービスから認証情報を盗む手口が有名。対策は宛先の許可リスト化、内部アドレスへの接続禁止、IMDSv2の利用など。"},
+{id:"wb6",t:"web",q:"URLの注文番号を書き換えると他人の注文が見えてしまう脆弱性への対策として適切なものはどれか。",c:["サーバ側で、要求された資源がログイン利用者のものかを毎回確認する","注文番号を連番からランダムな値に変える","注文番号をhiddenフィールドで送る","画面から注文番号を表示しない"],a:0,e:"IDOR（不適切な直接オブジェクト参照）はアクセス制御の欠如が原因。番号を推測しにくくするのは補助策で、認可チェックの代わりにはならない。"},
+{id:"wb7",t:"web",q:"Content-Security-Policy（CSP）ヘッダの主な効果はどれか。",c:["スクリプトなどを読み込める取得元を制限し、XSSの被害を緩和する","通信を暗号化する","Cookieの送信先を制限する","クリックジャッキングを完全に防ぐ"],a:0,e:"script-srcなどで許可した取得元以外のスクリプトやインラインスクリプトの実行を止められる。フレーム埋め込みの制御はframe-ancestorsディレクティブで行う。"},
+{id:"nw1",t:"net",q:"IDSと比べたIPSの特徴として適切なものはどれか。",c:["通信経路上に設置され、検知した攻撃通信を遮断できる","検知した通信を記録するだけで遮断しない","ホストのファイル改ざんだけを検知する","暗号化された通信の中身を必ず検査できる"],a:0,e:"IPSはインラインで動くため、誤検知が業務通信の遮断に直結する点に注意。IDSはミラーポートなどで監視し通知する。"},
+{id:"nw2",t:"net",q:"SYNフラッド攻撃への対策として有効なものはどれか。",c:["SYN Cookieを有効にする","ICMPを全面的に許可する","TCPのウィンドウサイズを大きくする","DNSのTTLを短くする"],a:0,e:"SYN Cookieは接続情報をシーケンス番号に埋め込み、ACKが返るまでサーバ側に状態を持たない。半開きの接続で資源を使い切らせる攻撃に強くなる。"},
+{id:"nw3",t:"net",q:"WAFの説明として適切なものはどれか。",c:["HTTPの内容を検査し、Webアプリケーションへの攻撃を遮断する","IPアドレスとポート番号だけで通信を許可・拒否する","端末のマルウェア感染を検知する","無線LANの不正アクセスポイントを検知する"],a:0,e:"SQLインジェクションやXSSのパターンを検出する。シグネチャ型のほか、正常な通信を学習するホワイトリスト型がある。2はパケットフィルタ型ファイアウォール。"},
+{id:"nw4",t:"net",q:"ARPスプーフィングの説明として適切なものはどれか。",c:["同一セグメント内でIPアドレスとMACアドレスの対応を偽り、通信を中継・盗聴する","DNSの応答を偽ってWebサイトを乗っ取る","送信元IPアドレスを偽ってDoS攻撃を行う","無線LANの認証を総当たりで破る"],a:0,e:"偽のARP応答でゲートウェイになりすまし、中間者攻撃を行う。対策はスイッチのDAI（Dynamic ARP Inspection）や静的ARPエントリ。"},
+{id:"nw5",t:"net",q:"DMZに公開Webサーバを置く目的として適切なものはどれか。",c:["公開サーバが侵害されても、内部LANへの被害拡大を防ぐ","公開サーバの通信を高速化する","内部LANの端末からインターネットへの通信を禁止する","公開サーバのIPアドレスを外部から隠す"],a:0,e:"ファイアウォールでインターネット、DMZ、内部LANを分け、DMZから内部LANへの通信を原則禁止する。"},
+{id:"cl1",t:"cloud",q:"IaaSを利用する場合に、一般に利用者側の責任となるものはどれか。",c:["仮想マシンのOSへのセキュリティパッチ適用","データセンターの物理的な入退室管理","ハイパーバイザの脆弱性対応","物理ネットワーク機器の保守"],a:0,e:"責任共有モデルではIaaSのOS以上は利用者の責任。SaaSになるほど事業者の範囲が広がるが、アカウント管理とデータの扱いは常に利用者側に残る。"},
+{id:"cl2",t:"cloud",q:"ゼロトラストの考え方として適切なものはどれか。",c:["社内外を問わず、アクセスのたびに利用者と端末の状態を検証して許可する","社内ネットワークからのアクセスは信頼する","VPN接続後はすべての社内システムに接続を許可する","境界ファイアウォールを強化すれば内部対策は不要"],a:0,e:"場所ではなく、ID、端末の状態、リスクをもとに都度判断する。Entra IDの条件付きアクセスやIntuneの準拠ポリシーが代表的な実装。"},
+{id:"cl3",t:"cloud",q:"EDRの主な役割はどれか。",c:["端末上の挙動を記録・監視し、侵害の検知と調査・封じ込めを支援する","既知のマルウェアのシグネチャ照合だけを行う","メールの添付ファイルを無害化する","Webアクセスを中継して有害サイトを遮断する"],a:0,e:"侵入を前提に、プロセスの起動や通信などを記録して不審な挙動を検知し、端末の隔離などの対応を行う。"},
+{id:"cl4",t:"cloud",q:"CASBの説明として適切なものはどれか。",c:["従業員のクラウドサービス利用を可視化し、利用や情報持出しを制御する","ログを集約して相関分析する","ソースコードの脆弱性を検査する","電子メールの送信ドメインを認証する"],a:0,e:"シャドーIT（無許可のクラウド利用）の把握や、許可したサービスでのデータ持出し制御に使う。2はSIEMの説明。"},
+{id:"cl5",t:"cloud",q:"SIEMの主な機能はどれか。",c:["複数の機器のログを集約し、相関分析で脅威を検知する","端末のディスクを暗号化する","通信を暗号化するVPNを構築する","パッチを自動で配布する"],a:0,e:"ファイアウォール、プロキシ、認証基盤などのログを突き合わせることで、単体では気付けない攻撃の流れを見つける。SOCの中核となる仕組み。"},
+{id:"ir1",t:"ir",q:"フォレンジック調査で、電源を切る前にメモリの内容を取得する理由はどれか。",c:["揮発性の高い情報から順に保全するため","ディスクの読み出しが速くなるため","ハードディスクの暗号化を解除するため","マルウェアを駆除するため"],a:0,e:"メモリ上の実行中プロセス、ネットワーク接続、復号鍵などは電源断で失われる。揮発性の高い順（レジスタ、メモリ、ディスク…）に取得するのが原則。"},
+{id:"ir2",t:"ir",q:"証拠として取得したディスクイメージのハッシュ値を記録する目的はどれか。",c:["取得後にデータが改ざんされていないことを示すため","ディスクイメージを暗号化するため","ディスクイメージを圧縮するため","削除されたファイルを復元するため"],a:0,e:"取得時と解析時のハッシュ値が一致すれば、証拠の同一性を示せる。取得者、日時、保管の経緯を記録する証拠保全の手続き（CoC）とあわせて行う。"},
+{id:"ir3",t:"ir",q:"ランサムウェア対策としてのバックアップの取り方で適切なものはどれか。",c:["ネットワークから切り離した場所や書換え不可の領域に、複数世代を保管する","常時接続のファイルサーバに最新版だけを保管する","同じPCの別ドライブに保管する","暗号化せず共有フォルダに置く"],a:0,e:"攻撃者はバックアップも暗号化・削除を狙う。オフラインやイミュータブルな保管、世代管理、定期的な復元テストが重要。"},
+{id:"ir4",t:"ir",q:"マルウェア感染が疑われるPCを見つけた直後の初動として適切なものはどれか。",c:["LANケーブルを抜くなどしてネットワークから隔離し、電源は切らずに報告する","すぐにOSを再インストールする","ウイルス対策ソフトでフルスキャンし、駆除できたら作業を続ける","電源を切ってから担当者に報告する"],a:0,e:"被害拡大を止めつつ、メモリ上の証拠を残すため電源は入れたままにするのが基本。再インストールは原因調査の証拠を消してしまう。"},
+{id:"sc1",t:"supply",q:"SBOMを整備しておく主な効果はどれか。",c:["新たな脆弱性が公表されたとき、影響を受けるソフトウェアを素早く特定できる","ソースコードの脆弱性を自動で修正できる","ライセンス費用を削減できる","通信を暗号化できる"],a:0,e:"SBOMはソフトウェアを構成する部品（ライブラリ名、バージョンなど）の一覧。Log4Shellのような事案で、どの製品に含まれるかをすぐに調べられる。"},
+{id:"sc2",t:"supply",q:"水飲み場型攻撃の説明はどれか。",c:["標的の組織がよく閲覧するWebサイトを改ざんし、訪問者を感染させる","大量のメールを無差別に送信する","正規のソフトウェア更新にマルウェアを混入する","関係者を装って電話で情報を聞き出す"],a:0,e:"標的を絞ったうえで、罠のサイトに来るのを待つ攻撃。3はソフトウェアサプライチェーン攻撃、4はソーシャルエンジニアリング（ビッシング）。"},
+{id:"sc3",t:"supply",q:"ソフトウェアの更新ファイルが途中で改ざんされていないことを利用者側で確かめる方法として適切なものはどれか。",c:["開発元のコード署名を検証する","ファイル名を確認する","ファイルサイズを確認する","ダウンロード速度を確認する"],a:0,e:"コード署名は開発元の秘密鍵で作られ、証明書チェーンで開発元を確認できる。ただし開発元の署名鍵やビルド環境が侵害されると防げないため、開発側の管理も重要。"},
+{id:"lw1",t:"law",q:"リスク対応のうち、サイバー保険に加入するものはどれに当たるか。",c:["リスク移転（共有）","リスク回避","リスク低減","リスク保有"],a:0,e:"損失の財務的な影響を第三者と分け合う対応。事業そのものをやめるのは回避、対策で発生確率や影響を下げるのは低減、何もせず受け入れるのは保有。"},
+{id:"lw2",t:"law",q:"不正アクセス禁止法で禁止されている行為として適切なものはどれか。",c:["他人のIDとパスワードを本人に無断で入力し、アクセス制御のあるシステムを利用する","自分のパスワードを忘れて何度も入力を間違える","公開されているWebページを閲覧する","自社のシステムに対して許可を得て脆弱性診断を行う"],a:0,e:"不正アクセス行為のほか、他人の識別符号の不正取得・保管、無断提供、フィッシングサイトの開設なども処罰対象。"},
+{id:"lw3",t:"law",q:"個人情報保護法で、件数にかかわらず個人情報保護委員会への報告が必要な漏えいはどれか。",c:["要配慮個人情報を含む個人データの漏えい","氏名だけが記載された名簿1件の紛失","暗号化され鍵も漏れていない個人データの漏えい","社内の別部署への誤送信で、すぐに回収できたもの"],a:0,e:"要配慮個人情報、財産的被害のおそれ、不正の目的による漏えいは1件でも報告対象。それ以外は1,000人を超える場合に報告が必要。高度な暗号化で保護されていれば対象外となる。"},
+{id:"lw4",t:"law",q:"CVSSの基本評価基準（Base Metrics）の説明として適切なものはどれか。",c:["脆弱性そのものの特性を評価し、時間や環境によって変わらない","攻撃コードの出回り状況によって変化する","利用者の環境に応じて評価し直す","対策の有無によって変化する"],a:0,e:"CVSS v3では基本、現状、環境の3つの評価基準がある。2と4は現状評価基準、3は環境評価基準の説明。"},
+{id:"lw5",t:"law",q:"ISMSにおいて、情報を必要なときに利用できる状態に保つ性質はどれか。",c:["可用性","機密性","完全性","真正性"],a:0,e:"CIAのA（Availability）。機密性は許可された人だけが見られること、完全性は正確で改ざんされていないこと。"},
+{id:"a11",t:"a1",q:"稼働率0.9の装置を2台直列に接続したシステムの稼働率はどれか。",c:["0.81","0.99","0.90","0.45"],a:0,e:"直列はどちらも動いている必要があるので0.9×0.9＝0.81。並列なら1−(1−0.9)²＝0.99。"},
+{id:"a12",t:"a1",q:"RAID5の特徴として適切なものはどれか。",c:["パリティを複数ディスクに分散し、1台の故障まで復旧できる","同じデータを2台に書き込むミラーリングである","冗長性はなく、速度だけを高める","2台同時の故障にも耐えられる"],a:0,e:"RAID1はミラーリング、RAID0はストライピングのみで冗長性なし、RAID6は二重パリティで2台までの故障に耐える。"},
+{id:"a13",t:"a1",q:"第3正規形にするために取り除くものはどれか。",c:["主キー以外の属性の間にある推移的関数従属","繰返し項目","主キーの一部だけに依存する部分関数従属","主キーそのもの"],a:0,e:"第1正規形で繰返しを除き、第2正規形で部分関数従属を除き、第3正規形で推移的関数従属を除く。"},
+{id:"a14",t:"a1",q:"EVMでスケジュール効率指数（SPI）を求める式はどれか。",c:["EV ÷ PV","EV ÷ AC","PV ÷ EV","AC ÷ EV"],a:0,e:"SPIが1未満なら計画より遅れている。コスト効率指数CPIはEV÷ACで、1未満なら予算超過。"},
+{id:"a15",t:"a1",q:"損益分岐点売上高を求める式はどれか。",c:["固定費 ÷（1 − 変動費率）","変動費 ÷（1 − 固定費率）","固定費 × 変動費率","売上高 − 変動費"],a:0,e:"1−変動費率は限界利益率。固定費を限界利益率で割ると、利益がちょうどゼロになる売上高になる。4は限界利益。"},
+{id:"a16",t:"a1",q:"SLAの説明として適切なものはどれか。",c:["サービス提供者と利用者の間で合意したサービスの品質水準","社内部門間でのサービス水準の合意","サービス品質を継続的に改善する活動","ITサービスの構成要素を管理する台帳"],a:0,e:"稼働率、応答時間、障害時の復旧時間などを数値で定める。2はOLA、3はSIP（サービス改善）、4はCMDB。"}
+];
+
+/* ---------- 日付 ---------- */
+function pad(n){return (n<10?"0":"")+n;}
+function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function parse(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function today(){return ymd(new Date());}
+function daysUntil(s){var a=parse(today()),b=parse(s);return Math.round((b-a)/86400000);}
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());var w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);return x;}
+function hm(m){m=Math.round(m);return Math.floor(m/60)+":"+pad(m%60);}
+function md(s){var d=parse(s);return (d.getMonth()+1)+"/"+d.getDate();}
+
+/* ---------- 状態 ---------- */
+var S={logs:[],checks:{},quiz:{},settings:{goal:600,examA:"2026-10-26",examB:"2026-11-21"}};
+var db=null, local=false;
+var LS="sc-app-v1";
+
+function lsLoad(){try{var v=JSON.parse(localStorage.getItem(LS)||"null");if(v){S.logs=v.logs||[];S.checks=v.checks||{};S.quiz=v.quiz||{};Object.assign(S.settings,v.settings||{});}}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+
+/* ドキュメントごとに書込みを直列化 */
+var chains={};
+function writeDoc(path,data){
+  if(local){lsSave();return Promise.resolve();}
+  var prev=chains[path]||Promise.resolve();
+  var p=prev.then(function(){return db.doc(path).set(data);}).catch(function(e){showErr(e);});
+  chains[path]=p;return p;
+}
+var timers={};
+function debounceWrite(path,getter,ms){
+  clearTimeout(timers[path]);
+  timers[path]=setTimeout(function(){writeDoc(path,getter());},ms||1200);
+}
+function showErr(e){
+  var el=document.getElementById("syncStatus");
+  if(e&&e.code==="quota_exceeded"){el.textContent="保存上限に達しました。古いログを削除してください";}
+  else if(e&&e.code==="invalid_argument"){el.textContent="この画面では保存できません（閲覧のみ）";}
+  else{el.textContent="保存に失敗しました。通信を確認してください";}
+}
+function setStatus(t){document.getElementById("syncStatus").textContent=t;}
+
+/* ---------- 残り日数 ---------- */
+function renderCountdown(){
+  var box=document.getElementById("countdown");box.innerHTML="";
+  var list=EXAMS.map(function(x){return {l:x.l,d:(x.k==="examA"?S.settings.examA:x.k==="examB"?S.settings.examB:x.d),edit:x.edit,k:x.k};});
+  var nextIdx=-1;
+  list.forEach(function(x,i){if(nextIdx<0&&daysUntil(x.d)>=0)nextIdx=i;});
+  list.forEach(function(x,i){
+    var n=daysUntil(x.d);
+    var el=document.createElement("div");
+    el.className="cd"+(i===nextIdx?" next":"")+(n<0?" done":"");
+    var num=document.createElement("span");num.className="n";
+    num.textContent=n<0?"済":n===0?"当日":String(n);
+    if(n>0){var s=document.createElement("small");s.textContent="日";num.appendChild(s);}
+    var lab=document.createElement("span");lab.className="l";
+    lab.textContent=x.l+"　"+md(x.d)+(x.edit?"":"〜");
+    el.appendChild(num);el.appendChild(lab);box.appendChild(el);
+  });
+}
+
+/* ---------- 今週 ---------- */
+function renderWeek(){
+  var mon=mondayOf(new Date()),from=ymd(mon);
+  var sun=new Date(mon);sun.setDate(sun.getDate()+6);var to=ymd(sun);
+  var by={},tot=0;
+  S.logs.forEach(function(l){if(l.date>=from&&l.date<=to){by[l.subject]=(by[l.subject]||0)+l.minutes;tot+=l.minutes;}});
+  var goal=S.settings.goal||600;
+  document.getElementById("wkTotal").textContent=hm(tot);
+  document.getElementById("wkPct").textContent="／ "+hm(goal)+"（"+Math.round(tot/goal*100)+"%）　"+md(from)+"〜"+md(to);
+  var m=document.getElementById("wkMeter");m.innerHTML="";
+  var scale=Math.max(goal,tot);
+  SUBJECTS.forEach(function(s){if(by[s.k]){var i=document.createElement("i");i.style.width=(by[s.k]/scale*100)+"%";i.style.background=s.c;i.title=s.n+" "+hm(by[s.k]);m.appendChild(i);}});
+  var lg=document.getElementById("legend");lg.innerHTML="";
+  SUBJECTS.forEach(function(s){var sp=document.createElement("span");sp.style.setProperty("--c",s.c);sp.textContent=s.n+" "+hm(by[s.k]||0);lg.appendChild(sp);});
+}
+
+/* ---------- 14日グラフ ---------- */
+function renderChart(){
+  var days=[],t=new Date();
+  for(var i=13;i>=0;i--){var d=new Date(t.getFullYear(),t.getMonth(),t.getDate()-i);days.push(ymd(d));}
+  var data=days.map(function(d){var o={d:d,tot:0};S.logs.forEach(function(l){if(l.date===d){o[l.subject]=(o[l.subject]||0)+l.minutes;o.tot+=l.minutes;}});return o;});
+  var max=Math.max(120,Math.ceil(Math.max.apply(null,data.map(function(o){return o.tot;}))/60)*60);
+  var W=640,H=200,L=36,R=8,T=10,B=28,cw=(W-L-R)/14,bw=cw*0.6;
+  var y=function(v){return T+(H-T-B)*(1-v/max);};
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="直近14日の学習時間">';
+  for(var g=0;g<=max;g+=60){if(max>360&&g%120)continue;s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(g)+'" y2="'+y(g)+'" stroke="var(--line)" stroke-width="1"/>';s+='<text x="'+(L-6)+'" y="'+(y(g)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+(g/60)+'h</text>';}
+  data.forEach(function(o,i){
+    var x=L+cw*i+(cw-bw)/2,acc=0;
+    SUBJECTS.forEach(function(sb){var v=o[sb.k];if(!v)return;var y1=y(acc+v),y0=y(acc);s+='<rect x="'+x.toFixed(1)+'" y="'+y1.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,y0-y1).toFixed(1)+'" fill="'+sb.c+'"><title>'+md(o.d)+' '+sb.n+' '+hm(v)+'</title></rect>';acc+=v;});
+    var isT=o.d===today();
+    s+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" font-size="10.5" fill="'+(isT?"var(--accent)":"var(--muted)")+'" font-weight="'+(isT?700:400)+'" font-family="JetBrains Mono,monospace">'+md(o.d)+'</text>';
+  });
+  s+='</svg>';
+  document.getElementById("chart").innerHTML=s;
+}
+
+/* ---------- タスク ---------- */
+function renderTasks(){
+  var box=document.getElementById("tasks");box.innerHTML="";
+  var t=today(),cur=-1;
+  TASKS.forEach(function(g,i){if(cur<0&&g.t>=t)cur=i;});
+  if(cur<0)cur=TASKS.length-1;
+  TASKS.forEach(function(g,i){
+    var det=document.createElement("details");det.className="wk";if(i===cur)det.open=true;
+    var done=g.items.filter(function(it){return S.checks[it[0]];}).length;
+    var sm=document.createElement("summary");
+    var a=document.createElement("span");a.textContent=g.w;
+    if(i===cur){var c=document.createElement("span");c.className="cur";c.textContent="今";a.appendChild(c);}
+    var b=document.createElement("span");b.className="mono";b.textContent=md(g.f)+"〜"+md(g.t)+"　"+done+"/"+g.items.length;
+    sm.appendChild(a);sm.appendChild(b);det.appendChild(sm);
+    var ul=document.createElement("ul");ul.className="tasks";
+    g.items.forEach(function(it){
+      var li=document.createElement("li");
+      var cb=document.createElement("input");cb.type="checkbox";cb.id="ck-"+it[0];cb.checked=!!S.checks[it[0]];
+      cb.addEventListener("change",function(){S.checks[it[0]]=cb.checked;b.textContent=md(g.f)+"〜"+md(g.t)+"　"+g.items.filter(function(x){return S.checks[x[0]];}).length+"/"+g.items.length;debounceWrite("plan/checks",function(){return Object.assign({},S.checks);},800);});
+      var lb=document.createElement("label");lb.htmlFor=cb.id;lb.textContent=it[1];
+      li.appendChild(cb);li.appendChild(lb);ul.appendChild(li);
+    });
+    det.appendChild(ul);box.appendChild(det);
+  });
+}
+
+/* ---------- 正答率 ---------- */
+function renderAcc(){
+  var box=document.getElementById("acc");box.innerHTML="";
+  Object.keys(THEMES).forEach(function(k){
+    var c=0,w=0,n=0;
+    Q.forEach(function(q){if(q.t!==k)return;n++;var st=S.quiz[q.id];if(st){c+=st.c||0;w+=st.w||0;}});
+    var tot=c+w,p=tot?Math.round(c/tot*100):null;
+    var r=document.createElement("div");r.className="r"+(p!==null&&p<60?" low":"");
+    var a=document.createElement("span");a.textContent=THEMES[k];
+    var bar=document.createElement("div");bar.className="bar";var i=document.createElement("i");i.style.width=(p||0)+"%";bar.appendChild(i);
+    var v=document.createElement("span");v.className="mono small";v.style.textAlign="right";v.textContent=p===null?"未回答":p+"%";
+    if(p===null)v.classList.add("muted");
+    r.appendChild(a);r.appendChild(bar);r.appendChild(v);box.appendChild(r);
+  });
+}
+
+/* ---------- ログ ---------- */
+function renderLogs(){
+  var ul=document.getElementById("logs");ul.innerHTML="";
+  var list=S.logs.slice().sort(function(a,b){return (b.date+(b.createdAt||0)).localeCompare(a.date+(a.createdAt||0));}).slice(0,40);
+  if(!list.length){var li=document.createElement("li");li.style.display="block";li.className="muted small";li.textContent="まだ記録がありません。タイマーか「追加」で最初の学習を記録しましょう。";ul.appendChild(li);return;}
+  list.forEach(function(l){
+    var li=document.createElement("li");
+    var d=document.createElement("span");d.className="mono small";d.textContent=md(l.date);
+    var ch=document.createElement("span");ch.className="chip";var sb=subj(l.subject);ch.style.setProperty("--c",sb.c);ch.textContent=hm(l.minutes);ch.title=sb.n;
+    var m=document.createElement("span");m.className="memo";m.textContent=sb.n+(l.memo?"　"+l.memo:"");
+    var x=document.createElement("button");x.className="x";x.textContent="削除";x.setAttribute("aria-label",md(l.date)+"の記録を削除");
+    x.addEventListener("click",function(){
+      if(x.dataset.arm!=="1"){x.dataset.arm="1";x.textContent="本当に削除";setTimeout(function(){x.dataset.arm="";x.textContent="削除";},3000);return;}
+      delLog(l);
+    });
+    li.appendChild(d);li.appendChild(ch);li.appendChild(m);li.appendChild(x);ul.appendChild(li);
+  });
+}
+function renderManage(){renderCountdown();renderWeek();renderChart();renderTasks();renderAcc();renderLogs();document.getElementById("goal").value=S.settings.goal;}
+
+function addLog(entry){
+  entry.createdAt=Date.now();
+  if(local){entry._id="l"+entry.createdAt;S.logs.push(entry);lsSave();renderAll();return;}
+  db.collection("logs").add(entry).catch(showErr);
+}
+function delLog(l){
+  if(local){S.logs=S.logs.filter(function(x){return x!==l;});lsSave();renderAll();return;}
+  db.doc("logs/"+l._id).delete().catch(showErr);
+}
+function renderAll(){renderManage();updateQInfo();}
+
+/* ---------- フォーム ---------- */
+function fillSelect(sel,includeQz){SUBJECTS.forEach(function(s){if(!includeQz&&s.k==="QZ")return;var o=document.createElement("option");o.value=s.k;o.textContent=s.n;sel.appendChild(o);});}
+fillSelect(document.getElementById("fSubject"),true);
+fillSelect(document.getElementById("tSubject"),false);
+document.getElementById("fDate").value=today();
+document.getElementById("fAdd").addEventListener("click",function(){
+  var d=document.getElementById("fDate").value,m=parseInt(document.getElementById("fMin").value,10);
+  var msg=document.getElementById("fMsg");
+  if(!d){msg.textContent="日付を入れてください。";return;}
+  if(!(m>=1&&m<=600)){msg.textContent="分は1〜600の範囲で入れてください。";return;}
+  addLog({date:d,minutes:m,subject:document.getElementById("fSubject").value,memo:document.getElementById("fMemo").value.trim()});
+  document.getElementById("fMemo").value="";
+  msg.textContent=md(d)+"に"+hm(m)+"を記録しました。";
+});
+document.getElementById("goal").addEventListener("change",function(e){
+  var v=parseInt(e.target.value,10);if(!(v>=60))return;S.settings.goal=v;renderWeek();
+  debounceWrite("settings/main",function(){return Object.assign({},S.settings);},600);
+});
+
+/* タイマー（開始時刻だけこのブラウザに保存） */
+var TK="sc-timer";var tick=null;
+function tGet(){try{return JSON.parse(localStorage.getItem(TK)||"null");}catch(e){return null;}}
+function tSet(v){try{if(v)localStorage.setItem(TK,JSON.stringify(v));else localStorage.removeItem(TK);}catch(e){}}
+var tState=tGet();
+function tRender(){
+  var btn=document.getElementById("tBtn"),clk=document.getElementById("tClock"),sel=document.getElementById("tSubject");
+  if(tState){var s=Math.floor((Date.now()-tState.start)/1000);clk.textContent=Math.floor(s/3600)+":"+pad(Math.floor(s/60)%60)+":"+pad(s%60);btn.textContent="終了して記録";btn.className="btn warn";sel.value=tState.subject;sel.disabled=true;}
+  else{clk.textContent="0:00:00";btn.textContent="タイマー開始";btn.className="btn primary";sel.disabled=false;}
+}
+function tLoop(){clearInterval(tick);if(tState)tick=setInterval(tRender,1000);tRender();}
+document.getElementById("tBtn").addEventListener("click",function(){
+  if(!tState){tState={start:Date.now(),subject:document.getElementById("tSubject").value};tSet(tState);tLoop();return;}
+  var min=Math.round((Date.now()-tState.start)/60000);
+  var msg=document.getElementById("fMsg");
+  if(min>=1){addLog({date:ymd(new Date(tState.start)),minutes:Math.min(min,600),subject:tState.subject,memo:"タイマー"});msg.textContent=hm(min)+"を記録しました。";}
+  else msg.textContent="1分未満のため記録しませんでした。";
+  tState=null;tSet(null);tLoop();
+});
+tLoop();
+
+/* ---------- タブ ---------- */
+function showTab(name){
+  var m=name==="study";
+  document.getElementById("tab-manage").setAttribute("aria-selected",String(!m));
+  document.getElementById("tab-study").setAttribute("aria-selected",String(m));
+  document.getElementById("p-manage").hidden=m;
+  document.getElementById("p-study").hidden=!m;
+}
+document.getElementById("tab-manage").addEventListener("click",function(){showTab("manage");});
+document.getElementById("tab-study").addEventListener("click",function(){showTab("study");});
+if(location.hash==="#study")showTab("study");
+
+/* ---------- 一問一答 ---------- */
+var qTheme=document.getElementById("qTheme");
+Object.keys(THEMES).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=THEMES[k]+"（"+Q.filter(function(q){return q.t===k;}).length+"問）";qTheme.appendChild(o);});
+function updateQInfo(){
+  var seen=Q.filter(function(q){return S.quiz[q.id];}).length;
+  var weak=Q.filter(function(q){var s=S.quiz[q.id];return s&&(s.w||0)>(s.c||0)*0.5;}).length;
+  document.getElementById("qInfo").textContent="全"+Q.length+"問中 "+seen+"問に回答済み。苦手判定 "+weak+"問。";
+}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var run=null;
+document.getElementById("qStart").addEventListener("click",startQuiz);
+function startQuiz(){
+  var th=qTheme.value,mode=document.getElementById("qMode").value,n=parseInt(document.getElementById("qCount").value,10);
+  var pool=Q.filter(function(q){return th==="all"||q.t===th;});
+  shuffle(pool);
+  if(mode==="weak"){
+    pool.sort(function(a,b){return score(b)-score(a);});
+  }
+  run={list:pool.slice(0,n),i:0,right:0,miss:[],start:Date.now()};
+  document.getElementById("qSetup").hidden=true;
+  document.getElementById("qCard").hidden=false;
+  showQ();
+}
+function score(q){var s=S.quiz[q.id];if(!s)return 1.5;var c=s.c||0,w=s.w||0;return w/(c+w)+(s.last&&s.last<Date.now()-3*86400000?0.3:0);}
+function showQ(){
+  var card=document.getElementById("qCard");card.innerHTML="";
+  var q=run.list[run.i];
+  var head=document.createElement("div");head.className="qhead";
+  var th=document.createElement("span");th.className="theme";th.textContent=THEMES[q.t];
+  var ct=document.createElement("span");ct.className="mono small muted";ct.textContent=(run.i+1)+" / "+run.list.length;
+  head.appendChild(th);head.appendChild(ct);card.appendChild(head);
+  var pr=document.createElement("div");pr.className="prog";var pi=document.createElement("i");pi.style.width=(run.i/run.list.length*100)+"%";pr.appendChild(pi);card.appendChild(pr);
+  var qt=document.createElement("p");qt.className="q";qt.textContent=q.q;card.appendChild(qt);
+  var order=shuffle([0,1,2,3]);
+  var box=document.createElement("div");box.className="choices";
+  var keys=["ア","イ","ウ","エ"];
+  var btns=[];
+  order.forEach(function(ci,pos){
+    var b=document.createElement("button");b.className="choice";b.type="button";
+    var k=document.createElement("span");k.className="k";k.textContent=keys[pos];
+    var t=document.createElement("span");t.textContent=q.c[ci];
+    b.appendChild(k);b.appendChild(t);
+    b.addEventListener("click",function(){answer(q,ci,b,btns,order,card);});
+    btns.push(b);box.appendChild(b);
+  });
+  card.appendChild(box);
+  btns[0].focus({preventScroll:true});
+}
+function answer(q,ci,btn,btns,order,card){
+  var ok=ci===q.a;
+  btns.forEach(function(b,pos){b.disabled=true;if(order[pos]===q.a)b.classList.add("right");});
+  if(!ok)btn.classList.add("wrong");
+  var st=S.quiz[q.id]||{c:0,w:0};st=Object.assign({},st);
+  if(ok){st.c=(st.c||0)+1;run.right++;}else{st.w=(st.w||0)+1;run.miss.push(q);}
+  st.last=Date.now();S.quiz[q.id]=st;
+  debounceWrite("quiz/stats",function(){return Object.assign({},S.quiz);},1500);
+  var ex=document.createElement("div");ex.className="exp";
+  var h=document.createElement("b");h.className=ok?"ok":"ng";h.textContent=ok?"正解":"不正解";
+  var p=document.createElement("p");p.textContent=q.e;
+  ex.appendChild(h);ex.appendChild(p);card.appendChild(ex);
+  var nx=document.createElement("button");nx.className="btn primary";nx.type="button";
+  var last=run.i===run.list.length-1;
+  nx.textContent=last?"結果を見る":"次の問題";
+  nx.addEventListener("click",function(){if(last)finish();else{run.i++;showQ();}});
+  var row=document.createElement("div");row.className="row";row.appendChild(nx);card.appendChild(row);
+  nx.focus({preventScroll:true});
+}
+function finish(){
+  var card=document.getElementById("qCard");card.innerHTML="";
+  var min=Math.max(1,Math.round((Date.now()-run.start)/60000));
+  var r=document.createElement("div");r.className="result";
+  var big=document.createElement("span");big.className="big";big.textContent=run.right+" / "+run.list.length;
+  var p=document.createElement("p");p.className="muted small";p.textContent="正答率 "+Math.round(run.right/run.list.length*100)+"%　所要 約"+min+"分";
+  r.appendChild(big);r.appendChild(p);
+  if(run.miss.length){
+    var h=document.createElement("h2");h.textContent="間違えた問題";h.style.justifySelf="start";r.appendChild(h);
+    var ul=document.createElement("ul");ul.className="misslist";
+    run.miss.forEach(function(q){var li=document.createElement("li");li.textContent=q.q+"　→ "+q.c[q.a];ul.appendChild(li);});
+    r.appendChild(ul);
+  }
+  var row=document.createElement("div");row.className="row";row.style.justifyContent="center";
+  var logb=document.createElement("button");logb.className="btn";logb.textContent="学習時間に"+min+"分を記録";
+  logb.addEventListener("click",function(){addLog({date:today(),minutes:min,subject:"QZ",memo:"一問一答 "+run.right+"/"+run.list.length});logb.disabled=true;logb.textContent="記録しました";});
+  var again=document.createElement("button");again.className="btn primary";again.textContent="もう一度";
+  again.addEventListener("click",function(){document.getElementById("qCard").hidden=true;document.getElementById("qSetup").hidden=false;updateQInfo();});
+  row.appendChild(logb);row.appendChild(again);r.appendChild(row);
+  card.appendChild(r);
+  renderAcc();
+}
+
+/* ---------- 起動 ---------- */
+renderAll();
+(async function(){
+  try{db=window.claude&&window.claude.use?await window.claude.use("db"):null;}catch(e){db=null;}
+  if(!db){local=true;lsLoad();document.getElementById("localBanner").hidden=false;setStatus("このブラウザに保存");renderAll();return;}
+  setStatus("同期中");
+  db.collection("logs").onSnapshot(function(snap){
+    S.logs=snap.docs.map(function(d){var o=Object.assign({},d.data());o._id=d.id;return o;});
+    renderManage();setStatus("保存済み");
+  },function(e){showErr(e);});
+  db.doc("plan/checks").onSnapshot(function(d){if(d.exists){S.checks=Object.assign({},d.data());renderTasks();}},function(){});
+  db.doc("quiz/stats").onSnapshot(function(d){if(d.exists&&!d.metadata.hasPendingWrites){S.quiz=Object.assign({},d.data());renderAcc();updateQInfo();}},function(){});
+  db.doc("settings/main").onSnapshot(function(d){if(d.exists){Object.assign(S.settings,d.data());renderCountdown();renderWeek();document.getElementById("goal").value=S.settings.goal;}},function(){});
+})();
+})();
+</script>
