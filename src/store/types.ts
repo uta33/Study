@@ -27,5 +27,7 @@ export interface Store {
   recordAnswer(questionId: string, ok: boolean): void;
   saveSettings(patch: Partial<Settings>): void;
   saveQuestion(q: QuestionOverride): void;
+  /** 一括保存。完了した件数を通知し、保存拒否時は例外を返す。 */
+  importQuestions(questions: QuestionOverride[], onProgress?: (saved: number) => void): Promise<void>;
   deleteQuestion(id: string): void;
 }

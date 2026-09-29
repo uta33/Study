@@ -7,6 +7,7 @@
 | パス | 内容 |
 |---|---|
 | `docs/setup-guide.md` | 使い始めるまでの本人の作業手順（Firebaseの設定、デプロイ、スマホへのインストール） |
+| `docs/question-import-export.md` | 問題のJSON・CSV一括追加、エクスポート、ファイル形式 |
 | `docs/sc-study-app-spec.md` | 開発依頼書（目的、試験日程、学習計画、機能要件、データモデル） |
 | `prototype/sc-study-app-prototype.html` | claude.aiで作った試作品 |
 | `src/` | アプリ本体（Vite + React + TypeScript） |
@@ -80,6 +81,7 @@ users/{uid}/questions/{id}   追加・編集した問題 { t, q, c: [4つ], a, e
 ## 問題とテーマの追加
 
 - 画面の「問題」タブから、問題の追加・編集・非表示ができます（Firestoreに保存）
+- 同じタブからJSON・CSVのエクスポート／インポートができます。追加用テンプレート、JSON貼り付け、取り込み前の件数確認に対応しています（[使い方と形式](docs/question-import-export.md)）
 - 内蔵問題を増やす場合は `src/data/questions.json` に `{ id, t, q, c, a, e }` の形で追記します
 - テーマを増やす場合は `src/data/themes.json` に `{ key, name }` を追記します（2027年度の新試験制度への対応を想定）
 
@@ -90,4 +92,4 @@ IPAの過去問題は利用条件を確認するまで取り込みません。20
 - 通勤用の音声モード（Web Speech API）
 - 用語カード
 - 科目Bの演習記録
-- データのエクスポート（JSON/CSV）
+- 学習ログ・正答率などのエクスポート（問題のJSON/CSV入出力は対応済み）

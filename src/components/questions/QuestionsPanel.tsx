@@ -5,6 +5,7 @@ import { useAppData } from "../../store/context";
 import type { QuestionOverride } from "../../types";
 import ConfirmButton from "../ConfirmButton";
 import QuestionForm from "./QuestionForm";
+import QuestionTransfer from "./QuestionTransfer";
 
 type Editing = { kind: "none" } | { kind: "new" } | { kind: "edit"; q: QuestionOverride & { builtin: boolean } };
 
@@ -60,6 +61,10 @@ export default function QuestionsPanel() {
           </label>
         </div>
         <p className="note">{list.length}問</p>
+      </section>
+      <QuestionTransfer filtered={list} />
+      <section className="card">
+        <h2>問題一覧</h2>
         <ul className="qlist">
           {list.map((q) => {
             const st = data.quiz[q.id];
