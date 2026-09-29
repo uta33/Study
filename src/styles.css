@@ -145,3 +145,13 @@ body{margin:0}
 .chrow{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
 .chrow input[type=radio]{width:18px;height:18px;accent-color:var(--ok);margin:0}
 .card{align-content:start}
+
+/* 問題の入出力はスマホ幅でも操作できるよう折り返す。 */
+.transfer fieldset{border:1px solid var(--line);border-radius:8px;padding:12px;min-width:0;display:grid;gap:10px}
+.transfer legend{font-weight:700;font-size:14px;padding:0 6px}
+.transfer input[type=file]{max-width:100%;font-size:13px}
+.transfer summary{cursor:pointer}
+.transfer-preview{border-top:1px solid var(--line);padding-top:12px;overflow-wrap:anywhere}
+.transfer-list{padding-left:1.2em;margin:0;font-size:13px}
+.transfer-error{white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto;padding:0}
+.transfer select{max-width:100%}

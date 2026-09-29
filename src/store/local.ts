@@ -81,6 +81,23 @@ export class LocalStore implements Store {
     this.update({ questions: [...rest, { ...q, updatedAt: Date.now() }] });
   }
 
+  /** 一括取り込みは保存できた場合だけ画面に反映する。容量不足時に成功表示しない。 */
+  async importQuestions(questions: Parameters<Store["importQuestions"]>[0], onProgress?: (saved: number) => void) {
+    const ids = new Set(questions.map((q) => q.id));
+    const updatedAt = Date.now();
+    const next = { ...this.data, questions: [...this.data.questions.filter((q) => !ids.has(q.id)), ...questions.map((q) => ({ ...q, updatedAt }))] };
+    try {
+      const { ready: _ready, ...saved } = next;
+      localStorage.setItem(LS, JSON.stringify(saved));
+    } catch {
+      throw new Error("このブラウザの保存容量が不足しているか、保存が許可されていません。問題は取り込んでいません。");
+    }
+    this.data = next;
+    this.listener?.(this.data);
+    this.syncListener?.({ state: "local" });
+    onProgress?.(questions.length);
+  }
+
   deleteQuestion(id: string) {
     this.update({ questions: this.data.questions.filter((x) => x.id !== id) });
   }

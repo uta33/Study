@@ -5,6 +5,7 @@ import {
   increment,
   onSnapshot,
   setDoc,
+  writeBatch,
   type DocumentReference,
   type Firestore,
   type FirestoreError,
@@ -182,5 +183,29 @@ export class FirestoreStore implements Store {
 
   deleteQuestion(id: string) {
     this.write(deleteDoc(this.ref("questions/" + id)));
+  }
+
+  /** 400問ずつ一括保存し、サーバーで確定した件数のみを報告する。 */
+  async importQuestions(questions: QuestionOverride[], onProgress?: (saved: number) => void) {
+    let saved = 0;
+    try {
+      for (let i = 0; i < questions.length; i += 400) {
+        const chunk = questions.slice(i, i + 400);
+        const batch = writeBatch(this.db);
+        chunk.forEach(({ id, ...question }) => {
+          const body = Object.fromEntries(Object.entries({ ...question, updatedAt: Date.now() }).filter(([, v]) => v !== undefined));
+          batch.set(this.ref("questions/" + id), body);
+        });
+        // オフラインなら復帰まで待つ。書込み失敗時はこのバッチ全体が反映されない。
+        await batch.commit();
+        saved += chunk.length;
+        onProgress?.(saved);
+      }
+      this.error = null;
+      this.emitSync();
+    } catch (e) {
+      this.fail(e as FirestoreError);
+      throw new Error(`${questions.length}問中${saved}問を保存済みです。残りは保存できませんでした。通信・ログイン状態を確認して、取り込み内容を再確認してください。保存済みの同じ内容は再取り込み時にスキップされます。`);
+    }
   }
 }
