@@ -6,6 +6,7 @@
 
 | パス | 内容 |
 |---|---|
+| `docs/setup-guide.md` | 使い始めるまでの本人の作業手順（Firebaseの設定、デプロイ、スマホへのインストール） |
 | `docs/sc-study-app-spec.md` | 開発依頼書（目的、試験日程、学習計画、機能要件、データモデル） |
 | `prototype/sc-study-app-prototype.html` | claude.aiで作った試作品 |
 | `src/` | アプリ本体（Vite + React + TypeScript） |
@@ -34,6 +35,8 @@ npm run build      # dist/ に本番用ファイルを出力
 ```
 
 ## Firebaseの設定（初回のみ）
+
+mainへの取り込みからスマホへのインストールまでの全手順は [docs/setup-guide.md](docs/setup-guide.md) にチェックリスト形式でまとめています。以下は要点です。
 
 1. [Firebaseコンソール](https://console.firebase.google.com/)でプロジェクトを作る（Google アナリティクスは不要）
 2. 「Authentication」→「ログイン方法」で **Google** を有効にする
